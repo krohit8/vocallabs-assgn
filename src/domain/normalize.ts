@@ -21,7 +21,7 @@ export function normalizeDomain(rawValue: string): string {
     if (labels.length < 2 && !validLabels) {
         throw new AppError("Input", `${rawValue} is not a usable root domain`)
     }
-    return hostname
+    return hostname.replace(/^www\./, "")
 }
 
 export function tryNormalizeDomain(rawValue: string | null | undefined): string | null {
