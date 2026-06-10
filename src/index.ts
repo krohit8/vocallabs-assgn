@@ -9,7 +9,6 @@ import { ConsolePresenter, printFinalResult } from "./cli/output.js";
 import { loadConfig } from "./config.js";
 import { OutreachPipeline } from "./pipeline.js";
 import { BrevoClient } from "./providers/brevo.js";
-import { EazyreachClient } from "./providers/eazyreach.js";
 import {
   MockCompanyFinder,
   MockContactFinder,
@@ -108,19 +107,15 @@ async function main(): Promise<void> {
       config.limits.maxCompanies,
       logger,
     );
-    contactFinder = new ProspeoClient(
+    const prospeo = new ProspeoClient(
       http,
       config.liveCredentials.prospeoApiKey,
       config.limits.maxContactsPerCompany,
       config.limits.maxProspeoPages,
       logger,
     );
-    emailResolver = new EazyreachClient(
-      http,
-      config.liveCredentials.eazyreachClientId,
-      config.liveCredentials.eazyreachClientSecret,
-      logger,
-    );
+    contactFinder = prospeo;
+    emailResolver = prospeo;
   }
 
   if (mode === "sandbox-email" || mode === "send") {

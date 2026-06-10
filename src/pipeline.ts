@@ -62,7 +62,7 @@ export class OutreachPipeline {
         }
 
         this.dependencies.presenter.stage(
-            `Eazyreach: resolving ${contacts.length} LinkedIn profiles`,
+            `Prospeo: resolving ${contacts.length} LinkedIn profiles`,
         );
         const enrichment =
             await this.dependencies.emailResolver.resolveVerifiedEmails(contacts);

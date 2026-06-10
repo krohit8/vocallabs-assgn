@@ -19,8 +19,6 @@ export interface AppConfig {
   liveCredentials: {
     oceanApiToken: string;
     prospeoApiKey: string;
-    eazyreachClientId: string;
-    eazyreachClientSecret: string;
   } | null;
   brevo: {
     apiKey: string;
@@ -64,8 +62,6 @@ const baseEnvironmentSchema = z.object({
 const liveEnvironmentSchema = z.object({
   OCEAN_API_TOKEN: z.string().min(1),
   PROSPEO_API_KEY: z.string().min(1),
-  EAZYREACH_CLIENT_ID: z.string().min(1),
-  EAZYREACH_CLIENT_SECRET: z.string().min(1),
 });
 
 const deliveryEnvironmentSchema = z.object({
@@ -156,8 +152,6 @@ export function loadConfig(
       ? {
           oceanApiToken: live.OCEAN_API_TOKEN,
           prospeoApiKey: live.PROSPEO_API_KEY,
-          eazyreachClientId: live.EAZYREACH_CLIENT_ID,
-          eazyreachClientSecret: live.EAZYREACH_CLIENT_SECRET,
         }
       : null,
     brevo: delivery

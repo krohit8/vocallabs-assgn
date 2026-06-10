@@ -3,14 +3,23 @@ import { z } from "zod";
 
 import { uniqueBy } from "../domain/deduplicate.js";
 import {
+  normalizeEmail,
   normalizeLinkedinUrl,
   tryNormalizeDomain,
 } from "../domain/normalize.js";
 import { ProviderError } from "../shared/error.js";
 import type { HttpClient } from "../shared/http-client.js";
-import type { Company, Contact, ContactFinder } from "../types.js";
+import type {
+  Company,
+  Contact,
+  ContactFinder,
+  EmailResolver,
+  EnrichedContact,
+  EnrichmentResult,
+} from "../types.js";
 
 const PROSPEO_URL = "https://api.prospeo.io/search-person";
+const PROSPEO_ENRICH_URL = "https://api.prospeo.io/enrich-person";
 
 const prospeoResponseSchema = z
   .object({
@@ -40,6 +49,24 @@ const prospeoResponseSchema = z
   })
   .passthrough();
 
+const prospeoEnrichResponseSchema = z
+  .object({
+    error: z.boolean().nullish(),
+    person: z
+      .object({
+        email: z
+          .object({
+            email: z.string().nullish(),
+            status: z.string().nullish(),
+          })
+          .passthrough()
+          .nullish(),
+      })
+      .passthrough()
+      .nullish(),
+  })
+  .passthrough();
+
 function isNoResultsError(error: unknown): boolean {
   if (
     !(error instanceof ProviderError) ||
@@ -51,7 +78,7 @@ function isNoResultsError(error: unknown): boolean {
   return Reflect.get(error.body, "error_code") === "NO_RESULTS";
 }
 
-export class ProspeoClient implements ContactFinder {
+export class ProspeoClient implements ContactFinder, EmailResolver {
   constructor(
     private readonly http: HttpClient,
     private readonly apiKey: string,
@@ -147,5 +174,85 @@ export class ProspeoClient implements ContactFinder {
       0,
       maximumContacts,
     );
+  }
+
+  async resolveVerifiedEmails(contacts: Contact[]): Promise<EnrichmentResult> {
+    const enriched: EnrichedContact[] = [];
+    let skipped = 0;
+    let failed = 0;
+
+    for (const contact of contacts) {
+      try {
+        const response = await this.http.request(
+          "Prospeo Enrich",
+          PROSPEO_ENRICH_URL,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-KEY": this.apiKey,
+            },
+            body: JSON.stringify({
+              data: { linkedin_url: contact.linkedinUrl },
+              only_verified_email: true,
+            }),
+          },
+          prospeoEnrichResponseSchema,
+        );
+
+        const emailObj = response.person?.email;
+        const email = emailObj?.email;
+        const emailStatus = emailObj?.status;
+
+        if (response.error === false && emailStatus === "VERIFIED" && email) {
+          const normalized = normalizeEmail(email);
+          if (normalized) {
+            enriched.push({
+              ...contact,
+              email: normalized,
+              emailStatus: "verified",
+            });
+            continue;
+          }
+        }
+
+        skipped += 1;
+        this.logger.warn(
+          { linkedinUrl: contact.linkedinUrl },
+          "Prospeo returned no verified email",
+        );
+      } catch (error) {
+        if (
+          error instanceof ProviderError &&
+          [400, 404, 422].includes(error.status ?? 0)
+        ) {
+          skipped += 1;
+          this.logger.warn(
+            { linkedinUrl: contact.linkedinUrl, status: error.status },
+            "Skipping unavailable Prospeo profile",
+          );
+          continue;
+        }
+
+        if (
+          error instanceof ProviderError &&
+          [401, 402, 403].includes(error.status ?? 0)
+        ) {
+          throw error;
+        }
+
+        failed += 1;
+        this.logger.warn(
+          { linkedinUrl: contact.linkedinUrl, error },
+          "Prospeo lookup failed",
+        );
+      }
+    }
+
+    return {
+      contacts: uniqueBy(enriched, (contact) => contact.email),
+      skipped,
+      failed,
+    };
   }
 }

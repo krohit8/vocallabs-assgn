@@ -2,7 +2,6 @@ import pino from "pino";
 import { describe, expect, it, vi } from "vitest";
 
 import { BrevoClient } from "../src/providers/brevo.js";
-import { EazyreachClient } from "../src/providers/eazyreach.js";
 import { OceanClient } from "../src/providers/ocean.js";
 import { ProspeoClient } from "../src/providers/prospeo.js";
 import { HttpClient } from "../src/shared/http-client.js";
@@ -45,12 +44,14 @@ describe("provider adapters", () => {
         JSON.stringify({
           companies: [
             {
-              domain: "www.acme.test",
-              name: "Acme",
-              description: "Software",
-              industries: ["Software"],
-              companySize: "11-50",
-              primaryCountry: "us",
+              company: {
+                domain: "www.acme.test",
+                name: "Acme",
+                description: "Software",
+                industries: ["Software"],
+                companySize: "11-50",
+                primaryCountry: "us",
+              }
             },
           ],
         }),
@@ -118,31 +119,30 @@ describe("provider adapters", () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
-  it("keeps only verified Eazyreach emails", async () => {
-    const fetchMock = vi
-      .fn()
-      .mockResolvedValueOnce(
-        new Response(JSON.stringify({ auth_token: "token" }), { status: 200 }),
-      )
-      .mockResolvedValueOnce(
-        new Response(
-          JSON.stringify({
-            emails: [
-              { email: "probable@acme.test", verification: "probable" },
-              { email: "VERIFIED@acme.test", verification: "verified" },
-            ],
-          }),
-          { status: 200 },
-        ),
-      );
-    const eazyreach = new EazyreachClient(
+  it("keeps only verified Prospeo emails", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          error: false,
+          person: {
+            email: {
+              email: "verified@acme.test",
+              status: "VERIFIED",
+            },
+          },
+        }),
+        { status: 200 },
+      ),
+    );
+    const prospeo = new ProspeoClient(
       clientFor(fetchMock),
-      "client",
-      "secret",
+      "key",
+      2,
+      3,
       logger,
     );
 
-    const result = await eazyreach.resolveVerifiedEmails([contact]);
+    const result = await prospeo.resolveVerifiedEmails([contact]);
 
     expect(result.contacts[0]?.email).toBe("verified@acme.test");
     expect(result.skipped).toBe(0);

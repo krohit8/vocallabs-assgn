@@ -28,8 +28,8 @@ export class ConsolePresenter implements PipelinePresenter {
     console.log(`Lookalike companies: ${result.companies.length}`);
     console.log(`Decision-makers: ${result.contacts.length}`);
     console.log(`Verified recipients: ${result.recipients.length}`);
-    console.log(`Eazyreach skipped: ${result.enrichmentSkipped}`);
-    console.log(`Eazyreach failed: ${result.enrichmentFailed}`);
+    console.log(`Prospeo enrich skipped: ${result.enrichmentSkipped}`);
+    console.log(`Prospeo enrich failed: ${result.enrichmentFailed}`);
 
     console.table(
       result.messages.map((message, index) => ({

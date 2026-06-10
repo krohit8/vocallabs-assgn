@@ -10,13 +10,15 @@ const OCEAN_URL = "https://api.ocean.io/v3/search/companies";
 const oceanResponseSchema = z.object({
     companies: z.array(
         z.object({
-            domain: z.string().nullish(),
-            name: z.string().nullish(),
-            companySize: z.string().nullish(),
-            primaryCountry: z.string().nullish(),
-            industries: z.array(z.string()).nullish(),
-            technologies: z.string().nullish(),
-            description: z.string().nullish(),
+            company: z.object({
+                domain: z.string().nullish(),
+                name: z.string().nullish(),
+                companySize: z.string().nullish(),
+                primaryCountry: z.string().nullish(),
+                industries: z.array(z.string()).nullish(),
+                technologies: z.string().nullish(),
+                description: z.string().nullish(),
+            }).passthrough()
         })
     )
         .default([]),
@@ -67,7 +69,7 @@ export class OceanClient implements CompanyFinder {
                 "Ocean reported a seed-domain indexing status"
             )
         }
-        const companies = response.companies.flatMap((company) => {
+        const companies = response.companies.flatMap(({ company }) => {
             const domain = tryNormalizeDomain(company.domain)
             if (!domain || domain === seedDomain) {
                 return []
