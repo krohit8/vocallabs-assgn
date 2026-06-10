@@ -101,7 +101,7 @@ export class HttpClient {
         return `HTTP ${status}`;
     }
 
-    async #retryAfterMilliseconds(response: Response): number {
+    #retryAfterMilliseconds(response: Response): number {
         const retryAfter = response.headers.get("retry-after")
         if (!retryAfter) {
             return 0

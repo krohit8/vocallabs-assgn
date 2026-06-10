@@ -207,9 +207,9 @@ importers:
 
   .:
     dependencies:
-      comander:
-        specifier: 0.0.1-security
-        version: 0.0.1-security
+      commander:
+        specifier: ^15.0.0
+        version: 15.0.0
       pino:
         specifier: ^10.3.1
         version: 10.3.1
@@ -726,8 +726,9 @@ packages:
     resolution: {integrity: sha512-NUPRluOfOiTKBKvWPtSD4PhFvWCqOi0BGStNWs57X9js7XGTprSmFoz5F0tWhR4WPjNeR9jXqdC7/UpSJTnlRg==}
     engines: {node: '>=18'}
 
-  comander@0.0.1-security:
-    resolution: {integrity: sha512-cxCGvHkaEtEsBsKjz8XrAiaOIkecgmMvhetsaxQYt35e8MEW4ATPevJTrzOrpAd1NyWmgIpLrwPLhQoHvnj89w==}
+  commander@15.0.0:
+    resolution: {integrity: sha512-z67u4ZhzCL/Tydu1lJARtEZYWbWaN7oYLHbsuzocr6y4N6WZAagG3RQ4FW61V1/0+jImpj293XfrcYnd1qxtPg==}
+    engines: {node: '>=22.12.0'}
 
   convert-source-map@2.0.0:
     resolution: {integrity: sha512-Kvp459HrV2FEJ1CAsi1Ku+MY3kasH19TFykTz2xWmMeq6bk2NU3XXvfJ+Q61m0xktWwt+1HSYf3JZsTms3aRJg==}
@@ -1661,7 +1662,7 @@ snapshots:
 
   chai@6.2.2: {}
 
-  comander@0.0.1-security: {}
+  commander@15.0.0: {}
 
   convert-source-map@2.0.0: {}
 

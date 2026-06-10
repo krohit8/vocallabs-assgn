@@ -1,5 +1,5 @@
 import { z } from "zod"
-import type { CompanyFinder } from "../types.js";
+import type { Company, CompanyFinder } from "../types.js";
 import type { HttpClient } from "../shared/http-client.js";
 import type { Logger } from "pino";
 import { tryNormalizeDomain } from "../domain/normalize.js";
