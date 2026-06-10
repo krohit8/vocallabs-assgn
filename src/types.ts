@@ -1,4 +1,4 @@
-
+export type RunMode = "mock" | "live-data" | "sandbox-email" | "send";
 
 
 export interface Company {
@@ -58,3 +58,26 @@ export interface DeliveryResult {
 export interface EmailSender {
     send(messages: EmailMessage[], sandbox: boolean): Promise<DeliveryResult[]>;
 }
+
+export interface PipelineResult {
+  seedDomain: string;
+  companies: Company[];
+  contacts: Contact[];
+  recipients: EnrichedContact[];
+  messages: EmailMessage[];
+  enrichmentSkipped: number;
+  enrichmentFailed: number;
+  deliveryResults: DeliveryResult[];
+  cancelled: boolean;
+}
+export interface PipelinePresenter {
+  stage(message: string): void;
+  summary(
+    result: Omit<PipelineResult, "deliveryResults" | "cancelled">,
+    mode: RunMode,
+  ): void;
+}
+export type DeliveryConfirmation = (
+  mode: "sandbox-email" | "send",
+  messageCount: number,
+) => Promise<boolean>;
