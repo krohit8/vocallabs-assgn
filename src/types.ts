@@ -5,8 +5,8 @@ export interface Company {
     domain: string
     name: string,
     description: string,
-    companySize: string,
-    primaryCountry: string,
+    size: string,
+    country: string,
     industries: string[],
 }
 export interface Contact {
@@ -25,4 +25,19 @@ export interface CompanyFinder{
 
 export interface ContactFinder {
   findDecisionMakers(companies: Company[]): Promise<Contact[]>;
+}
+
+export interface EnrichedContact extends Contact {
+  email: string;
+  emailStatus: "verified";
+}
+
+export interface EnrichmentResult {
+  contacts: EnrichedContact[];
+  skipped: number;
+  failed: number;
+}
+
+export interface EmailResolver {
+  resolveVerifiedEmails(contacts: Contact[]): Promise<EnrichmentResult>;
 }
