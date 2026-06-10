@@ -10,34 +10,51 @@ export interface Company {
     industries: string[],
 }
 export interface Contact {
-  firstName: string;
-  lastName: string;
-  fullName: string;
-  title: string;
-  linkedinUrl: string;
-  companyDomain: string;
-  companyName: string;
+    firstName: string;
+    lastName: string;
+    fullName: string;
+    title: string;
+    linkedinUrl: string;
+    companyDomain: string;
+    companyName: string;
 }
 
-export interface CompanyFinder{
-    findLookalikes(seedDomain:string): Promise<Company[]>;
+export interface CompanyFinder {
+    findLookalikes(seedDomain: string): Promise<Company[]>;
 }
 
 export interface ContactFinder {
-  findDecisionMakers(companies: Company[]): Promise<Contact[]>;
+    findDecisionMakers(companies: Company[]): Promise<Contact[]>;
 }
 
 export interface EnrichedContact extends Contact {
-  email: string;
-  emailStatus: "verified";
+    email: string;
+    emailStatus: "verified";
 }
 
 export interface EnrichmentResult {
-  contacts: EnrichedContact[];
-  skipped: number;
-  failed: number;
+    contacts: EnrichedContact[];
+    skipped: number;
+    failed: number;
 }
 
 export interface EmailResolver {
-  resolveVerifiedEmails(contacts: Contact[]): Promise<EnrichmentResult>;
+    resolveVerifiedEmails(contacts: Contact[]): Promise<EnrichmentResult>;
+}
+export interface EmailMessage {
+    contact: EnrichedContact;
+    subject: string;
+    textContent: string;
+    htmlContent: string;
+}
+
+export interface DeliveryResult {
+    email: string;
+    ok: boolean;
+    messageId?: string;
+    error?: string;
+}
+
+export interface EmailSender {
+    send(messages: EmailMessage[], sandbox: boolean): Promise<DeliveryResult[]>;
 }
