@@ -34,3 +34,28 @@ export function tryNormalizeDomain(rawValue: string | null | undefined): string 
         return null
     }
 }
+
+export function normalizeLinkedinUrl(
+    rawValue: string | null | undefined
+): string | null {
+    if (!rawValue) {
+        return null
+    }
+    const candidate = rawValue.includes("://") ? rawValue : `https://${rawValue}`
+    try {
+        const url = new URL(candidate)
+        const hostname = url.hostname.toLowerCase().replace(/^www\./, "")
+        if (hostname !== 'linkedin.com' && !hostname.endsWith(".linkedin.com")) {
+            return null;
+        }
+        const pathname = url.pathname.replace(/\/+$/, "");
+        return pathname ? `https://www.linkedin.com${pathname}` : null
+    } catch {
+        return null;
+    }
+}
+
+export function normalizeEmail(rawValue: string): string | null {
+    const value = rawValue.trim().toLowerCase();
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? value : null;
+}
